@@ -53,7 +53,7 @@ export default class extends Controller {
       this.guideText = payload.guide
       this.guideTarget.textContent = payload.guide
       this.guideTarget.hidden = false
-      this.setStatus("ガイドを表示しました。")
+      this.setStatus(payload.location ? `${payload.location}付近のガイドです。` : "ガイドを表示しました。")
       this.speakGuide()
     } catch (error) {
       this.showError(error.message || "通信に失敗しました。")

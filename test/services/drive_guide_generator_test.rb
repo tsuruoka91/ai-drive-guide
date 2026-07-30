@@ -2,7 +2,7 @@ require "test_helper"
 
 class DriveGuideGeneratorTest < ActiveSupport::TestCase
   test "returns the fixed MVP guide" do
-    guide = DriveGuideGenerator.call(latitude: 35.681236, longitude: 139.767125)
+    guide = DriveGuideGenerator.new(api_key: nil).call(latitude: 35.681236, longitude: 139.767125)
 
     assert_equal "安全運転で出発しましょう。周囲をよく確認してください。", guide
   end
@@ -19,13 +19,13 @@ class DriveGuideGeneratorTest < ActiveSupport::TestCase
 
     guide = DriveGuideGenerator.new(client:, api_key: "test-key", model: "test-model").call(
       latitude: 35.681236,
-      longitude: 139.767125
+      longitude: 139.767125,
+      location: "丸の内、千代田区"
     )
 
     assert_equal "周囲をよく確認して、安全運転で進みましょう。", guide
     assert_equal "test-model", request[:model]
-    assert_includes request[:input], "緯度 35.681"
-    assert_includes request[:input], "経度 139.767"
+    assert_equal "現在地の周辺: 丸の内、千代田区", request[:input]
   end
 
   test "raises a safe error when the API response is empty" do

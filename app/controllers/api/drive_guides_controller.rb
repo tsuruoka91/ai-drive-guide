@@ -3,8 +3,12 @@ module Api
     def create
       latitude = coordinate!(:latitude, -90.0..90.0)
       longitude = coordinate!(:longitude, -180.0..180.0)
+      location = LocationLabelResolver.call(latitude:, longitude:)
 
-      render json: { guide: DriveGuideGenerator.call(latitude:, longitude:) }
+      render json: {
+        guide: DriveGuideGenerator.call(latitude:, longitude:, location:),
+        location:
+      }
     rescue DriveGuideGenerator::GenerationError
       render json: { error: "ガイドを生成できませんでした。しばらくしてからもう一度お試しください。" }, status: :service_unavailable
     rescue ActionController::ParameterMissing, ArgumentError

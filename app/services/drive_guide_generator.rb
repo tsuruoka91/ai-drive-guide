@@ -4,8 +4,8 @@ class DriveGuideGenerator
 
   class GenerationError < StandardError; end
 
-  def self.call(latitude:, longitude:)
-    new.call(latitude:, longitude:)
+  def self.call(latitude:, longitude:, location: nil)
+    new.call(latitude:, longitude:, location:)
   end
 
   def initialize(client: nil, api_key: ENV["OPENAI_API_KEY"], model: MODEL)
@@ -14,7 +14,7 @@ class DriveGuideGenerator
     @model = model
   end
 
-  def call(latitude:, longitude:)
+  def call(latitude:, longitude:, location: nil)
     return GUIDE if @api_key.blank?
 
     response = client.responses.create(
@@ -23,7 +23,7 @@ class DriveGuideGenerator
         "指定地点の周辺を走行中の人へ、20〜40文字程度の短い一文を返してください。" \
         "道路状況、交通規制、店舗などを推測して断定しないでください。" \
         "安全確認を促す内容にしてください。",
-      input: "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}"
+      input: location.present? ? "現在地の周辺: #{location}" : "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}"
     )
     guide = response.output_text.to_s.strip
 

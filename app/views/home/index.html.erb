@@ -1,6 +1,7 @@
 <main class="welcome" data-controller="drive-guide">
   <h1>AI Drive Guide</h1>
   <p>現在地をもとに、短いドライブガイドをお届けします。</p>
+  <p class="privacy-note">現在地の周辺情報をOpenAIとOpenStreetMapへ送信します。位置情報は保存しません。</p>
 
   <button class="primary-button" type="button" data-drive-guide-target="startButton" data-action="drive-guide#start">
     ドライブ開始
@@ -28,4 +29,8 @@
       </button>
     </section>
   <% end %>
+
+  <p class="attribution">
+    地点情報: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>
+  </p>
 </main>

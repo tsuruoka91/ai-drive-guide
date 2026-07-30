@@ -63,6 +63,12 @@ body {
   color: #b42318;
 }
 
+.privacy-note,
+.attribution {
+  color: #526074;
+  font-size: 0.875rem;
+}
+
 .guide {
   font-size: 1.125rem;
   font-weight: 700;

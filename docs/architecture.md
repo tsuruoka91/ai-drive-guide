@@ -59,6 +59,10 @@ test/controllers/api/drive_guides_controller_test.rb
 
 送信する座標は小数第3位へ丸める。座標をそのまま保存せず、ログにも出力しない。APIキー未設定時はローカル確認用に固定ガイドを返すが、本番では必ずAPIキーを設定する。
 
+## 逆ジオコーディング
+
+`LocationLabelResolver` がOpenStreetMap Nominatimのreverse APIをサーバーから呼び出し、道路・地域名を抽出する。抽出した地点名だけをOpenAIへ渡す。公開Nominatimの利用条件に従い、単一プロセス内で毎秒1回以下に制限し、`NOMINATIM_USER_AGENT` を設定し、UIにOpenStreetMapの帰属を表示する。レート制限を超える利用では、専用Nominatimまたは商用プロバイダへ移行する。
+
 ## セキュリティとプライバシー
 
 - Geolocation APIはHTTPSでのみ利用する。本番では必ずTLSを終端する。
