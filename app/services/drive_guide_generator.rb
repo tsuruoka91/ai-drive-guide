@@ -4,8 +4,8 @@ class DriveGuideGenerator
   Guide = Data.define(:display_text, :speech_text)
 
   GUIDE = Guide.new(
-    display_text: "安全運転で出発しましょう。周囲をよく確認してください。",
-    speech_text: "あんぜんうんてんで しゅっぱつしましょう。しゅういを よく かくにんしてください。"
+    display_text: "ドライブの時間を、のんびりお楽しみください。",
+    speech_text: "どらいぶの じかんを、のんびり おたのしみください。"
   ).freeze
   MODEL = ENV.fetch("OPENAI_MODEL", "gpt-5.6-luna")
 
@@ -44,17 +44,14 @@ class DriveGuideGenerator
   end
 
   def input_for(latitude:, longitude:, location:, landmarks:, history:)
-    context = []
-    context << "現在地の周辺: #{location}" if location.present?
-    context << "近隣の実在スポット: #{landmarks.join("、")}" if landmarks.any?
-    context << "確認済みの歴史・概要: #{history}" if history.present?
-    context << "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}" if context.empty?
-    context.join("\n")
+    "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}"
   end
 
   def instructions
     <<~INSTRUCTIONS.squish
-      あなたは日本語の観光バスガイドです。乗客向けに、現在地周辺の聞きやすい案内を作成してください。
+      あなたは日本語のドライブ番組パーソナリティです。おおよその現在地をきっかけに、乗客が楽しめる聞きやすいラジオ風ガイドを作成してください。
+      このガイドは娯楽目的の創作です。実在の施設、歴史、営業情報、交通状況を正確に案内する必要はありません。場所にまつわる自由な想像、季節感、運転中の気分に寄り添う話題を使えます。
+      ただし、具体的な運転操作の指示や緊急情報のように受け取られる内容は避けてください。
       display_text は画面表示用の通常の日本語表記です。地名・人名・施設名と一般的な語には漢字を使い、ひらがなだけの文章にはしないでください。
       speech_text は display_text と同じ内容の読み上げ専用文です。こちらだけは漢字を一切使わず、地名・人名・施設名を含めて正しい読みのひらがなまたはカタカナにしてください。
       読みやすい位置で句読点と空白を使えます。

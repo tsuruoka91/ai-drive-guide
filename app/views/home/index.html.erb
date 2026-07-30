@@ -1,7 +1,7 @@
 <main class="welcome" data-controller="drive-guide" data-drive-guide-development-value="<%= Rails.env.development? %>" data-drive-guide-google-maps-api-key-value="<%= ENV.fetch("GOOGLE_MAPS_API_KEY", "") %>">
   <h1>AI Drive Guide</h1>
-  <p>現在地をもとに、短いドライブガイドをお届けします。</p>
-  <p class="privacy-note">現在地の周辺情報をOpenAIとOpenStreetMapへ送信します。位置情報は保存しません。</p>
+  <p>現在地をもとに、ドライブガイドをお届けします。</p>
+  <p class="privacy-note">現在地のおおよその座標をOpenAIへ送信します。位置情報は保存しません。</p>
 
   <button class="primary-button" type="button" data-drive-guide-target="startButton" data-action="drive-guide#start">
     ドライブ開始
@@ -35,7 +35,4 @@
     </section>
   <% end %>
 
-  <p class="attribution">
-    地点情報: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> / 概要: <a href="https://ja.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia contributors</a>
-  </p>
 </main>

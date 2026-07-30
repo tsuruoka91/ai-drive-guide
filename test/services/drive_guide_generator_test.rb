@@ -4,8 +4,8 @@ class DriveGuideGeneratorTest < ActiveSupport::TestCase
   test "returns the fixed MVP guide" do
     guide = DriveGuideGenerator.new(api_key: nil).call(latitude: 35.681236, longitude: 139.767125)
 
-    assert_equal "安全運転で出発しましょう。周囲をよく確認してください。", guide.display_text
-    assert_equal "あんぜんうんてんで しゅっぱつしましょう。しゅういを よく かくにんしてください。", guide.speech_text
+    assert_equal "ドライブの時間を、のんびりお楽しみください。", guide.display_text
+    assert_equal "どらいぶの じかんを、のんびり おたのしみください。", guide.speech_text
   end
 
   test "uses the Responses API when an API key is configured" do
@@ -33,9 +33,8 @@ class DriveGuideGeneratorTest < ActiveSupport::TestCase
     assert_equal "とうきょうえきの ちかくを そうこうしています。しゅういを よく かくにんして、あんぜんうんてんで すすみましょう。", guide.speech_text
     assert_equal "test-model", request[:model]
     assert_equal "json_schema", request.dig(:text, :format, :type)
-    assert_includes request[:input], "現在地の周辺: 丸の内、千代田区"
-    assert_includes request[:input], "近隣の実在スポット: 東京駅"
-    assert_includes request[:input], "確認済みの歴史・概要: 東京駅は、東京都千代田区にある鉄道駅です。"
+    assert_equal "おおよその現在地: 緯度 35.681, 経度 139.767", request[:input]
+    assert_includes request[:instructions], "娯楽目的の創作"
   end
 
   test "raises a safe error when the API response is empty" do

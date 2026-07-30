@@ -8,16 +8,11 @@ module Api
 
       latitude = coordinate!(:latitude, -90.0..90.0)
       longitude = coordinate!(:longitude, -180.0..180.0)
-      location = LocationLabelResolver.call(latitude:, longitude:)
-      landmarks = NearbyLandmarkResolver.call(latitude:, longitude:)
-      history = WikipediaSummaryResolver.call(title: landmarks.find(&:wikipedia_title)&.wikipedia_title)
-
-      guide = DriveGuideGenerator.call(latitude:, longitude:, location:, landmarks: landmarks.map(&:name), history:)
+      guide = DriveGuideGenerator.call(latitude:, longitude:)
 
       render json: {
         guide: guide.display_text,
-        speech_text: guide.speech_text,
-        location:
+        speech_text: guide.speech_text
       }
     rescue DriveGuideGenerator::GenerationError
       render json: { error: "ガイドを生成できませんでした。しばらくしてからもう一度お試しください。" }, status: :service_unavailable
