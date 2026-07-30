@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+const IIZUKA_CAMPUS = { latitude: 33.65409392, longitude: 130.67159183 }
+
 export default class extends Controller {
   static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton", "map", "mapNotice", "mapSimulationButton"]
   static values = { development: Boolean, googleMapsApiKey: String }
@@ -8,6 +10,10 @@ export default class extends Controller {
     this.guideText = null
     this.isRequesting = false
     this.googleMapsLoadingPromise = null
+
+    if (this.developmentValue && this.googleMapsApiKeyValue) {
+      this.updateMap(IIZUKA_CAMPUS, { markerTitle: "九州工業大学飯塚キャンパス（シミュレーション初期位置）" })
+    }
   }
 
   start() {
@@ -119,7 +125,7 @@ export default class extends Controller {
     return "geolocation" in navigator
   }
 
-  async updateMap(coords) {
+  async updateMap(coords, { markerTitle = "現在地" } = {}) {
     if (!this.googleMapsApiKeyValue) {
       this.mapNoticeTarget.hidden = false
       this.mapNoticeTarget.textContent = "地図を表示するには、GOOGLE_MAPS_API_KEY を設定してください。"
@@ -140,11 +146,12 @@ export default class extends Controller {
         this.currentLocationMarker = new window.google.maps.Marker({
           map: this.map,
           position: center,
-          title: "現在地"
+          title: markerTitle
         })
       } else {
         this.map.setCenter(center)
         this.currentLocationMarker.setPosition(center)
+        this.currentLocationMarker.setTitle(markerTitle)
       }
 
       this.mapNoticeTarget.hidden = true
