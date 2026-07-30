@@ -1,6 +1,11 @@
 module Api
   class DriveGuidesController < ApplicationController
     def create
+      unless DriveGuideRequestLimiter.allow?(request.remote_ip)
+        render json: { error: "ガイドの取得が集中しています。少し時間を置いてからもう一度お試しください。" }, status: :too_many_requests
+        return
+      end
+
       latitude = coordinate!(:latitude, -90.0..90.0)
       longitude = coordinate!(:longitude, -180.0..180.0)
       location = LocationLabelResolver.call(latitude:, longitude:)

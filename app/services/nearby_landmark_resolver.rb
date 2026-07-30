@@ -3,6 +3,7 @@ require "net/http"
 require "uri"
 
 class NearbyLandmarkResolver
+  include ExternalHttpRetry
   Landmark = Struct.new(:name, :wikipedia_title, keyword_init: true)
   ENDPOINT = URI("https://overpass-api.de/api/interpreter")
   SEARCH_RADIUS_METERS = 600
@@ -33,9 +34,10 @@ class NearbyLandmarkResolver
     cached_landmarks = @cache&.read(cache_key)
     return cached_landmarks if cached_landmarks.present?
 
-    throttle! if @throttle
-
-    body = @fetcher ? @fetcher.call(query_for(latitude:, longitude:)) : perform_request(latitude:, longitude:)
+    body = with_external_http_retry do
+      throttle! if @throttle
+      @fetcher ? @fetcher.call(query_for(latitude:, longitude:)) : perform_request(latitude:, longitude:)
+    end
     return [] unless body
 
     landmarks = JSON.parse(body).fetch("elements", []).filter_map do |element|

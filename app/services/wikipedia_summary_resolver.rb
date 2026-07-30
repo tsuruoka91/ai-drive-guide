@@ -3,6 +3,7 @@ require "net/http"
 require "uri"
 
 class WikipediaSummaryResolver
+  include ExternalHttpRetry
   ENDPOINT = "https://ja.wikipedia.org/w/api.php".freeze
   DEFAULT_USER_AGENT = "ai-drive-guide/0.1".freeze
 
@@ -17,7 +18,7 @@ class WikipediaSummaryResolver
   def call(title:)
     return if title.blank?
 
-    body = @fetcher ? @fetcher.call(uri_for(title)) : perform_request(title)
+    body = with_external_http_retry { @fetcher ? @fetcher.call(uri_for(title)) : perform_request(title) }
     return unless body
 
     JSON.parse(body).dig("query", "pages", 0, "extract").to_s.strip.presence

@@ -3,6 +3,7 @@ require "net/http"
 require "uri"
 
 class LocationLabelResolver
+  include ExternalHttpRetry
   ENDPOINT = "https://nominatim.openstreetmap.org/reverse".freeze
   MINIMUM_REQUEST_INTERVAL = 1.1
   DEFAULT_USER_AGENT = "ai-drive-guide/0.1".freeze
@@ -25,9 +26,10 @@ class LocationLabelResolver
   end
 
   def call(latitude:, longitude:)
-    throttle! if @throttle
-
-    response = @fetcher ? @fetcher.call(uri_for(latitude:, longitude:), headers) : perform_request(latitude:, longitude:)
+    response = with_external_http_retry do
+      throttle! if @throttle
+      @fetcher ? @fetcher.call(uri_for(latitude:, longitude:), headers) : perform_request(latitude:, longitude:)
+    end
     return unless response.is_a?(Net::HTTPSuccess)
 
     label_for(JSON.parse(response.body))

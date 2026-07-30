@@ -1,20 +1,22 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation"]
+  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton"]
 
   connect() {
     this.guideText = null
+    this.isRequesting = false
   }
 
   start() {
+    if (this.isRequesting) return
+
     if (!this.geolocationAvailable()) {
       this.showError("このブラウザでは位置情報を利用できません。")
       return
     }
 
-    this.startButtonTarget.disabled = true
-    this.retrySpeechButtonTarget.hidden = true
+    this.beginRequest()
     this.setStatus("現在地を取得しています…")
 
     navigator.geolocation.getCurrentPosition(
@@ -25,16 +27,19 @@ export default class extends Controller {
   }
 
   startSimulation() {
+    if (this.isRequesting) return
+
     const [latitude, longitude] = this.simulationLocationTarget.value.split(",").map(Number)
 
-    this.startButtonTarget.disabled = true
-    this.retrySpeechButtonTarget.hidden = true
+    this.beginRequest()
     this.setStatus("シミュレーション地点でガイドを準備しています…")
     this.requestGuide({ latitude, longitude })
   }
 
   async requestGuide(coords) {
     this.setStatus("ガイドを準備しています…")
+    const abortController = new AbortController()
+    const timeoutId = window.setTimeout(() => abortController.abort(), 30_000)
 
     try {
       const response = await fetch("/api/drive_guides", {
@@ -44,7 +49,8 @@ export default class extends Controller {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content
         },
-        body: JSON.stringify({ latitude: coords.latitude, longitude: coords.longitude })
+        body: JSON.stringify({ latitude: coords.latitude, longitude: coords.longitude }),
+        signal: abortController.signal
       })
       const payload = await response.json()
 
@@ -56,9 +62,11 @@ export default class extends Controller {
       this.setStatus(payload.location ? `${payload.location}付近のガイドです。` : "ガイドを表示しました。")
       this.speakGuide()
     } catch (error) {
-      this.showError(error.message || "通信に失敗しました。")
+      const message = error.name === "AbortError" ? "ガイドの準備に時間がかかっています。もう一度お試しください。" : error.message
+      this.showError(message || "通信に失敗しました。")
     } finally {
-      this.startButtonTarget.disabled = false
+      window.clearTimeout(timeoutId)
+      this.finishRequest()
     }
   }
 
@@ -86,6 +94,7 @@ export default class extends Controller {
     }
 
     this.showError(messages[error.code] || "位置情報を取得できませんでした。")
+    this.finishRequest()
   }
 
   geolocationAvailable() {
@@ -100,6 +109,18 @@ export default class extends Controller {
   showError(message) {
     this.statusTarget.textContent = message
     this.statusTarget.classList.add("error")
+  }
+
+  beginRequest() {
+    this.isRequesting = true
+    this.startButtonTarget.disabled = true
+    if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = true
+    this.retrySpeechButtonTarget.hidden = true
+  }
+
+  finishRequest() {
+    this.isRequesting = false
     this.startButtonTarget.disabled = false
+    if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = false
   }
 }

@@ -35,4 +35,23 @@ class LocationLabelResolverTest < ActiveSupport::TestCase
 
     assert_nil resolver.call(latitude: 35.681, longitude: 139.767)
   end
+
+  test "retries once after a temporary network error" do
+    attempts = 0
+    resolver = LocationLabelResolver.new(
+      throttle: false,
+      fetcher: lambda do |*|
+        attempts += 1
+        raise Net::ReadTimeout if attempts == 1
+
+        response = Struct.new(:body).new({ address: { city: "千代田区" } }.to_json)
+        response.define_singleton_method(:is_a?) { |klass| klass == Net::HTTPSuccess || super(klass) }
+        response
+      end
+    )
+    resolver.define_singleton_method(:sleep) { |_| }
+
+    assert_equal "千代田区", resolver.call(latitude: 35.681, longitude: 139.767)
+    assert_equal 2, attempts
+  end
 end
