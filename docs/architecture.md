@@ -55,7 +55,7 @@ test/controllers/api/drive_guides_controller_test.rb
 
 ## OpenAI API連携
 
-`DriveGuideGenerator` はOpenAIのResponses APIを利用する。APIキーは `OPENAI_API_KEY` としてRailsコンテナだけへ渡し、ブラウザへ送らない。既定モデルは短いガイドの低遅延用途に `gpt-5.6-luna` を使い、`OPENAI_MODEL` で変更できる。
+`DriveGuideGenerator` はOpenAIのResponses APIとStructured Outputsを利用する。APIキーは `OPENAI_API_KEY` としてRailsコンテナだけへ渡し、ブラウザへ送らない。既定モデルは短いガイドの低遅延用途に `gpt-5.6-luna` を使い、`OPENAI_MODEL` で変更できる。応答は `display_text`（漢字混じりの画面表示）と `speech_text`（漢字を含まない読み上げ用）の2項目とし、ブラウザのSpeechSynthesisには後者だけを渡す。Railsは漢字を含まない `display_text`、または漢字を含む `speech_text` をエラーとして扱う。
 
 送信する座標は小数第3位へ丸める。座標をそのまま保存せず、ログにも出力しない。APIキー未設定時はローカル確認用に固定ガイドを返すが、本番では必ずAPIキーを設定する。
 
@@ -63,7 +63,7 @@ test/controllers/api/drive_guides_controller_test.rb
 
 `LocationLabelResolver` がOpenStreetMap Nominatimのreverse APIをサーバーから呼び出し、道路・地域名を抽出する。`NearbyLandmarkResolver` はOverpass APIで周辺600mの名称付き観光・歴史・公園・駅スポットを最大5件取得し、丸めた座標をキーにプロセス内メモリへ5分だけ保持する。OSMに日本語Wikipedia参照がある最初のスポットだけ、`WikipediaSummaryResolver` がWikipediaの冒頭要約を最大3文取得する。地点名、取得済みスポット名、要約だけをOpenAIへ渡し、未確認の歴史・営業情報・交通状況を生成させない。公開APIは単一プロセス内で毎秒1回以下に制限し、`NOMINATIM_USER_AGENT`、`OVERPASS_USER_AGENT`、`WIKIPEDIA_USER_AGENT` を設定する。一時的なネットワーク障害だけは各取得処理で1回再試行する。UIにOpenStreetMapとWikipediaの帰属を表示し、レート制限を超える利用では、専用インスタンスまたは商用プロバイダへ移行する。
 
-`DriveGuideRequestLimiter` は座標を保存せず、IPアドレスをSHA-256化したキーだけをプロセス内メモリへ一時保持して、同一IPからのガイド取得を1分間に3回へ制限する。Pumaの複数プロセス・複数コンテナに拡張する際は、Redisなどの共有ストアを使うレート制限に置き換える。ブラウザはリクエスト中の開始操作を無効化し、30秒で通信を打ち切る。OpenAI呼び出しは、応答が失われた場合の二重課金を避けるためアプリ側では自動再試行しない。
+`DriveGuideRequestLimiter` は座標を保存せず、IPアドレスをSHA-256化したキーだけをプロセス内メモリへ一時保持して、本番環境で同一IPからのガイド取得を1分間に3回へ制限する。Pumaの複数プロセス・複数コンテナに拡張する際は、Redisなどの共有ストアを使うレート制限に置き換える。ブラウザはリクエスト中の開始操作を無効化し、本番環境では30秒で通信を打ち切る。開発環境では、GPSシミュレーションを含むデバッグのために両方の制限を無効化する。OpenAI呼び出しは、応答が失われた場合の二重課金を避けるためアプリ側では自動再試行しない。
 
 ## セキュリティとプライバシー
 

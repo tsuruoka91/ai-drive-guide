@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton"]
+  static values = { development: Boolean }
 
   connect() {
     this.guideText = null
@@ -39,7 +40,7 @@ export default class extends Controller {
   async requestGuide(coords) {
     this.setStatus("ガイドを準備しています…")
     const abortController = new AbortController()
-    const timeoutId = window.setTimeout(() => abortController.abort(), 30_000)
+    const timeoutId = this.developmentValue ? null : window.setTimeout(() => abortController.abort(), 30_000)
 
     try {
       const response = await fetch("/api/drive_guides", {
@@ -56,7 +57,7 @@ export default class extends Controller {
 
       if (!response.ok) throw new Error(payload.error || "ガイドを取得できませんでした。")
 
-      this.guideText = payload.guide
+      this.guideText = payload.speech_text || payload.guide
       this.guideTarget.textContent = payload.guide
       this.guideTarget.hidden = false
       this.setStatus(payload.location ? `${payload.location}付近のガイドです。` : "ガイドを表示しました。")
@@ -65,7 +66,7 @@ export default class extends Controller {
       const message = error.name === "AbortError" ? "ガイドの準備に時間がかかっています。もう一度お試しください。" : error.message
       this.showError(message || "通信に失敗しました。")
     } finally {
-      window.clearTimeout(timeoutId)
+      if (timeoutId) window.clearTimeout(timeoutId)
       this.finishRequest()
     }
   }

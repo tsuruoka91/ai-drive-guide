@@ -1,7 +1,7 @@
 module Api
   class DriveGuidesController < ApplicationController
     def create
-      unless DriveGuideRequestLimiter.allow?(request.remote_ip)
+      unless Rails.env.development? || DriveGuideRequestLimiter.allow?(request.remote_ip)
         render json: { error: "ガイドの取得が集中しています。少し時間を置いてからもう一度お試しください。" }, status: :too_many_requests
         return
       end
@@ -12,8 +12,11 @@ module Api
       landmarks = NearbyLandmarkResolver.call(latitude:, longitude:)
       history = WikipediaSummaryResolver.call(title: landmarks.find(&:wikipedia_title)&.wikipedia_title)
 
+      guide = DriveGuideGenerator.call(latitude:, longitude:, location:, landmarks: landmarks.map(&:name), history:)
+
       render json: {
-        guide: DriveGuideGenerator.call(latitude:, longitude:, location:, landmarks: landmarks.map(&:name), history:),
+        guide: guide.display_text,
+        speech_text: guide.speech_text,
         location:
       }
     rescue DriveGuideGenerator::GenerationError

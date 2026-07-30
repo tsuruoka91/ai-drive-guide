@@ -11,6 +11,7 @@ class Api::DriveGuidesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal "安全運転で出発しましょう。周囲をよく確認してください。", response.parsed_body["guide"]
+    assert_equal "あんぜんうんてんで しゅっぱつしましょう。しゅういを よく かくにんしてください。", response.parsed_body["speech_text"]
     assert_equal "丸の内、千代田区", response.parsed_body["location"]
   end
 
