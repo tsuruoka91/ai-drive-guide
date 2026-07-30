@@ -2,7 +2,7 @@ require "test_helper"
 
 class Api::DriveGuidesControllerTest < ActionDispatch::IntegrationTest
   test "returns the fixed guide for valid coordinates" do
-    with_location_label("丸の内、千代田区") do
+    with_location_context(location: "丸の内、千代田区", landmarks: ["東京駅"] ) do
       original_api_key = ENV.delete("OPENAI_API_KEY")
       post "/api/drive_guides", params: { latitude: 35.681236, longitude: 139.767125 }, as: :json
     ensure
@@ -23,12 +23,16 @@ class Api::DriveGuidesControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def with_location_label(label)
-    singleton_class = LocationLabelResolver.singleton_class
-    original = singleton_class.instance_method(:call)
-    singleton_class.define_method(:call) { |**| label }
+  def with_location_context(location:, landmarks:)
+    label_singleton_class = LocationLabelResolver.singleton_class
+    landmark_singleton_class = NearbyLandmarkResolver.singleton_class
+    original_label = label_singleton_class.instance_method(:call)
+    original_landmarks = landmark_singleton_class.instance_method(:call)
+    label_singleton_class.define_method(:call) { |**| location }
+    landmark_singleton_class.define_method(:call) { |**| landmarks }
     yield
   ensure
-    singleton_class.define_method(:call, original)
+    label_singleton_class.define_method(:call, original_label)
+    landmark_singleton_class.define_method(:call, original_landmarks)
   end
 end

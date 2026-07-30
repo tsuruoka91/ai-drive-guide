@@ -20,12 +20,14 @@ class DriveGuideGeneratorTest < ActiveSupport::TestCase
     guide = DriveGuideGenerator.new(client:, api_key: "test-key", model: "test-model").call(
       latitude: 35.681236,
       longitude: 139.767125,
-      location: "丸の内、千代田区"
+      location: "丸の内、千代田区",
+      landmarks: ["東京駅"]
     )
 
     assert_equal "周囲をよく確認して、安全運転で進みましょう。", guide
     assert_equal "test-model", request[:model]
-    assert_equal "現在地の周辺: 丸の内、千代田区", request[:input]
+    assert_includes request[:input], "現在地の周辺: 丸の内、千代田区"
+    assert_includes request[:input], "近隣の実在スポット: 東京駅"
   end
 
   test "raises a safe error when the API response is empty" do

@@ -61,7 +61,7 @@ test/controllers/api/drive_guides_controller_test.rb
 
 ## 逆ジオコーディング
 
-`LocationLabelResolver` がOpenStreetMap Nominatimのreverse APIをサーバーから呼び出し、道路・地域名を抽出する。抽出した地点名だけをOpenAIへ渡す。公開Nominatimの利用条件に従い、単一プロセス内で毎秒1回以下に制限し、`NOMINATIM_USER_AGENT` を設定し、UIにOpenStreetMapの帰属を表示する。レート制限を超える利用では、専用Nominatimまたは商用プロバイダへ移行する。
+`LocationLabelResolver` がOpenStreetMap Nominatimのreverse APIをサーバーから呼び出し、道路・地域名を抽出する。`NearbyLandmarkResolver` はOverpass APIで周辺600mの名称付き観光・歴史・公園・駅スポットを最大5件取得する。地点名と取得済みスポット名だけをOpenAIへ渡し、未確認の歴史・営業情報・交通状況を生成させない。公開APIは単一プロセス内で毎秒1回以下に制限し、`NOMINATIM_USER_AGENT` と `OVERPASS_USER_AGENT` を設定し、UIにOpenStreetMapの帰属を表示する。レート制限を超える利用では、専用インスタンスまたは商用プロバイダへ移行する。
 
 ## セキュリティとプライバシー
 

@@ -4,8 +4,8 @@ class DriveGuideGenerator
 
   class GenerationError < StandardError; end
 
-  def self.call(latitude:, longitude:, location: nil)
-    new.call(latitude:, longitude:, location:)
+  def self.call(latitude:, longitude:, location: nil, landmarks: [])
+    new.call(latitude:, longitude:, location:, landmarks:)
   end
 
   def initialize(client: nil, api_key: ENV["OPENAI_API_KEY"], model: MODEL)
@@ -14,16 +14,16 @@ class DriveGuideGenerator
     @model = model
   end
 
-  def call(latitude:, longitude:, location: nil)
+  def call(latitude:, longitude:, location: nil, landmarks: [])
     return GUIDE if @api_key.blank?
 
     response = client.responses.create(
       model: @model,
-      instructions: "あなたは安全運転を支援する日本語のドライブガイドです。" \
-        "指定地点の周辺を走行中の人へ、20〜40文字程度の短い一文を返してください。" \
-        "道路状況、交通規制、店舗などを推測して断定しないでください。" \
-        "安全確認を促す内容にしてください。",
-      input: location.present? ? "現在地の周辺: #{location}" : "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}"
+      instructions: "あなたは日本語の観光バスガイドです。運転中の乗客へ、40〜70文字程度の短い一文を返してください。" \
+        "地点名と近隣スポットとして与えられた情報だけを事実として使い、言及するスポットは最大1つにしてください。" \
+        "歴史、営業時間、交通状況、道路規制、混雑などは推測して断定しないでください。" \
+        "近隣スポットがなければ、安全確認を促す短い案内にしてください。",
+      input: input_for(latitude:, longitude:, location:, landmarks:)
     )
     guide = response.output_text.to_s.strip
 
@@ -40,5 +40,13 @@ class DriveGuideGenerator
 
   def client
     @client ||= OpenAI::Client.new
+  end
+
+  def input_for(latitude:, longitude:, location:, landmarks:)
+    context = []
+    context << "現在地の周辺: #{location}" if location.present?
+    context << "近隣の実在スポット: #{landmarks.join("、")}" if landmarks.any?
+    context << "おおよその現在地: 緯度 #{latitude.round(3)}, 経度 #{longitude.round(3)}" if context.empty?
+    context.join("\n")
   end
 end
