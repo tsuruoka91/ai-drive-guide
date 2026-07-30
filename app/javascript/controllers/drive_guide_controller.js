@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton", "map", "mapNotice"]
+  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton", "map", "mapNotice", "mapSimulationButton"]
   static values = { development: Boolean, googleMapsApiKey: String }
 
   connect() {
@@ -40,6 +40,17 @@ export default class extends Controller {
     this.setStatus("シミュレーション地点でガイドを準備しています…")
     const coords = { latitude, longitude }
     this.updateMap(coords)
+    this.requestGuide(coords)
+  }
+
+  startMapSimulation() {
+    if (this.isRequesting || !this.map) return
+
+    const center = this.map.getCenter()
+    const coords = { latitude: center.lat(), longitude: center.lng() }
+
+    this.beginRequest()
+    this.setStatus("地図の中心地点でガイドを準備しています…")
     this.requestGuide(coords)
   }
 
@@ -137,6 +148,7 @@ export default class extends Controller {
       }
 
       this.mapNoticeTarget.hidden = true
+      if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.hidden = false
     } catch (_) {
       this.mapNoticeTarget.hidden = false
       this.mapNoticeTarget.textContent = "地図を読み込めませんでした。Google Maps APIキーの設定を確認してください。"
@@ -190,6 +202,7 @@ export default class extends Controller {
     this.isRequesting = true
     this.startButtonTarget.disabled = true
     if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = true
+    if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.disabled = true
     this.retrySpeechButtonTarget.hidden = true
   }
 
@@ -197,5 +210,6 @@ export default class extends Controller {
     this.isRequesting = false
     this.startButtonTarget.disabled = false
     if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = false
+    if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.disabled = false
   }
 }

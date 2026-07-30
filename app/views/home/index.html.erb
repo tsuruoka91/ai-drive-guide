@@ -14,6 +14,11 @@
     <h2 id="map-title">現在地</h2>
     <div class="map" data-drive-guide-target="map" aria-label="現在地を表示する地図"></div>
     <p class="map-notice" aria-live="polite" data-drive-guide-target="mapNotice">現在地を取得すると地図を表示します。</p>
+    <% if Rails.env.development? %>
+      <button class="secondary-button map-simulation-button" type="button" data-drive-guide-target="mapSimulationButton" data-action="drive-guide#startMapSimulation" hidden>
+        地図中心でシミュレーション
+      </button>
+    <% end %>
   </section>
 
   <button class="secondary-button" type="button" data-drive-guide-target="retrySpeechButton" data-action="drive-guide#speakGuide" hidden>
