@@ -20,9 +20,23 @@
       <p>GPSを使わず、選択した地点でガイド取得と読み上げを確認できます。</p>
       <label for="simulation-location">地点</label>
       <select id="simulation-location" data-drive-guide-target="simulationLocation">
-        <option value="35.681236,139.767125">東京駅</option>
-        <option value="35.658034,139.701636">渋谷駅</option>
-        <option value="35.710063,139.810700">東京スカイツリー</option>
+        <optgroup label="東京都">
+          <option value="35.681236,139.767125">東京駅</option>
+          <option value="35.658034,139.701636">渋谷駅</option>
+          <option value="35.710063,139.810700">東京スカイツリー</option>
+        </optgroup>
+        <optgroup label="福岡県飯塚市">
+          <option value="33.646000,130.691000">飯塚駅周辺</option>
+          <option value="33.652000,130.694000">新飯塚駅周辺</option>
+          <option value="33.644000,130.690000">嘉穂劇場</option>
+          <option value="33.641000,130.686000">旧伊藤伝右衛門邸</option>
+          <option value="33.652000,130.680000">飯塚市歴史資料館</option>
+          <option value="33.650000,130.687000">勝盛公園</option>
+          <option value="33.640511,130.627536">八木山展望公園</option>
+          <option value="33.656747,130.690892">寺山古墳</option>
+          <option value="33.678599,130.705899">目尾炭坑跡</option>
+          <option value="33.652862,130.697478">忠霊塔</option>
+        </optgroup>
       </select>
       <button class="secondary-button" type="button" data-action="drive-guide#startSimulation">
         シミュレーションで開始
