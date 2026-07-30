@@ -25,6 +25,8 @@ services:
       RAILS_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ai_drive_guide_development}
       RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.6-luna}
     depends_on:
       db:
         condition: service_healthy

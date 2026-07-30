@@ -5,6 +5,8 @@ module Api
       longitude = coordinate!(:longitude, -180.0..180.0)
 
       render json: { guide: DriveGuideGenerator.call(latitude:, longitude:) }
+    rescue DriveGuideGenerator::GenerationError
+      render json: { error: "ガイドを生成できませんでした。しばらくしてからもう一度お試しください。" }, status: :service_unavailable
     rescue ActionController::ParameterMissing, ArgumentError
       render json: { error: "位置情報を正しく受信できませんでした。" }, status: :unprocessable_entity
     end

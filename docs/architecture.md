@@ -53,9 +53,11 @@ test/controllers/api/drive_guides_controller_test.rb
 
 固定文言を返す `DriveGuideGenerator` を先に作り、後のOpenAI連携ではサービス実装だけを差し替えられるようにする。
 
-## 次のフェーズ
+## OpenAI API連携
 
-OpenAI API連携では、`DriveGuideGenerator` の実装を差し替える。APIキーはRails Credentialsまたはデプロイ環境の環境変数で管理し、座標をそのまま送る必要があるかを最小化してから導入する。
+`DriveGuideGenerator` はOpenAIのResponses APIを利用する。APIキーは `OPENAI_API_KEY` としてRailsコンテナだけへ渡し、ブラウザへ送らない。既定モデルは短いガイドの低遅延用途に `gpt-5.6-luna` を使い、`OPENAI_MODEL` で変更できる。
+
+送信する座標は小数第3位へ丸める。座標をそのまま保存せず、ログにも出力しない。APIキー未設定時はローカル確認用に固定ガイドを返すが、本番では必ずAPIキーを設定する。
 
 ## セキュリティとプライバシー
 
