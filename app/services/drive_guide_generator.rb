@@ -19,10 +19,7 @@ class DriveGuideGenerator
 
     response = client.responses.create(
       model: @model,
-      instructions: "あなたは日本語の観光バスガイドです。運転中の乗客へ、100〜160文字程度の聞きやすい案内を2〜3文で返してください。" \
-        "地点名と近隣スポットとして与えられた情報だけを事実として使い、言及するスポットは最大1つにしてください。" \
-        "歴史要約があるときだけ、その内容を短く紹介してください。営業時間、交通状況、道路規制、混雑などは推測して断定しないでください。" \
-        "近隣スポットがなければ、安全確認を促す案内にしてください。",
+      instructions: "あなたは日本語の観光バスガイドです。乗客へ、聞きやすい案内を返してください。",
       input: input_for(latitude:, longitude:, location:, landmarks:, history:)
     )
     guide = response.output_text.to_s.strip
