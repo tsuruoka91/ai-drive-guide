@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 const IIZUKA_CAMPUS = { latitude: 33.65409392, longitude: 130.67159183 }
 
 export default class extends Controller {
-  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton", "map", "mapNotice", "mapSimulationButton"]
+  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "map", "mapNotice"]
   static values = { development: Boolean, googleMapsApiKey: String }
 
   connect() {
@@ -18,6 +18,16 @@ export default class extends Controller {
 
   start() {
     if (this.isRequesting) return
+
+    if (this.developmentValue && this.hasSimulationLocationTarget) {
+      const coords = this.selectedDebugLocation()
+
+      this.beginRequest()
+      this.setStatus("選択した観光地でガイドを準備しています…")
+      this.updateMap(coords, { markerTitle: this.simulationLocationTarget.selectedOptions[0].text })
+      this.requestGuide(coords)
+      return
+    }
 
     if (!this.geolocationAvailable()) {
       this.showError("このブラウザでは位置情報を利用できません。")
@@ -37,27 +47,16 @@ export default class extends Controller {
     )
   }
 
-  startSimulation() {
-    if (this.isRequesting) return
+  moveMapToSelectedLocation() {
+    const { latitude, longitude } = this.selectedDebugLocation()
+    const landmarkName = this.simulationLocationTarget.selectedOptions[0].text
 
-    const [latitude, longitude] = this.simulationLocationTarget.value.split(",").map(Number)
-
-    this.beginRequest()
-    this.setStatus("シミュレーション地点でガイドを準備しています…")
-    const coords = { latitude, longitude }
-    this.updateMap(coords)
-    this.requestGuide(coords)
+    this.updateMap({ latitude, longitude }, { markerTitle: landmarkName })
   }
 
-  startMapSimulation() {
-    if (this.isRequesting || !this.map) return
-
-    const center = this.map.getCenter()
-    const coords = { latitude: center.lat(), longitude: center.lng() }
-
-    this.beginRequest()
-    this.setStatus("地図の中心地点でガイドを準備しています…")
-    this.requestGuide(coords)
+  selectedDebugLocation() {
+    const [latitude, longitude] = this.simulationLocationTarget.value.split(",").map(Number)
+    return { latitude, longitude }
   }
 
   async requestGuide(coords) {
@@ -155,7 +154,6 @@ export default class extends Controller {
       }
 
       this.mapNoticeTarget.hidden = true
-      if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.hidden = false
     } catch (_) {
       this.mapNoticeTarget.hidden = false
       this.mapNoticeTarget.textContent = "地図を読み込めませんでした。Google Maps APIキーの設定を確認してください。"
@@ -208,15 +206,11 @@ export default class extends Controller {
   beginRequest() {
     this.isRequesting = true
     this.startButtonTarget.disabled = true
-    if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = true
-    if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.disabled = true
     this.retrySpeechButtonTarget.hidden = true
   }
 
   finishRequest() {
     this.isRequesting = false
     this.startButtonTarget.disabled = false
-    if (this.hasSimulationButtonTarget) this.simulationButtonTarget.disabled = false
-    if (this.hasMapSimulationButtonTarget) this.mapSimulationButtonTarget.disabled = false
   }
 }
