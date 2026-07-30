@@ -12,4 +12,20 @@
   <button class="secondary-button" type="button" data-drive-guide-target="retrySpeechButton" data-action="drive-guide#speakGuide" hidden>
     もう一度読み上げる
   </button>
+
+  <% if Rails.env.development? %>
+    <section class="debug-panel" aria-labelledby="simulation-title">
+      <h2 id="simulation-title">開発用: 現在地シミュレーション</h2>
+      <p>GPSを使わず、選択した地点でガイド取得と読み上げを確認できます。</p>
+      <label for="simulation-location">地点</label>
+      <select id="simulation-location" data-drive-guide-target="simulationLocation">
+        <option value="35.681236,139.767125">東京駅</option>
+        <option value="35.658034,139.701636">渋谷駅</option>
+        <option value="35.710063,139.810700">東京スカイツリー</option>
+      </select>
+      <button class="secondary-button" type="button" data-action="drive-guide#startSimulation">
+        シミュレーションで開始
+      </button>
+    </section>
+  <% end %>
 </main>

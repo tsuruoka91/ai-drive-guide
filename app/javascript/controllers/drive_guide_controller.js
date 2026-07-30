@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["startButton", "status", "guide", "retrySpeechButton"]
+  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation"]
 
   connect() {
     this.guideText = null
@@ -22,6 +22,15 @@ export default class extends Controller {
       (error) => this.handleLocationError(error),
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 }
     )
+  }
+
+  startSimulation() {
+    const [latitude, longitude] = this.simulationLocationTarget.value.split(",").map(Number)
+
+    this.startButtonTarget.disabled = true
+    this.retrySpeechButtonTarget.hidden = true
+    this.setStatus("シミュレーション地点でガイドを準備しています…")
+    this.requestGuide({ latitude, longitude })
   }
 
   async requestGuide(coords) {

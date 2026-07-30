@@ -9,6 +9,7 @@
 - Docker Composeで開発する。Webアプリは `http://localhost:3000` で起動する。
 - 固定文言を返す最初のMVPは実装済み。位置情報取得、Rails API、画面表示、SpeechSynthesisによる読み上げを含む。
 - OpenAI API連携、位置情報の永続化、走行履歴は未実装。
+- 開発環境だけではGPSシミュレーターが表示される。本番用画面やAPIへテスト地点の分岐を持ち込まない。
 
 ## 実装上の方針
 
