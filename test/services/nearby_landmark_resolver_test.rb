@@ -20,7 +20,8 @@ class NearbyLandmarkResolverTest < ActiveSupport::TestCase
 
     landmarks = resolver.call(latitude: 35.710063, longitude: 139.8107)
 
-    assert_equal ["東京スカイツリー", "すみだ水族館"], landmarks
+    assert_equal ["東京スカイツリー", "すみだ水族館"], landmarks.map(&:name)
+    assert_nil landmarks.first.wikipedia_title
     assert_includes query, "around:600,35.71,139.811"
   end
 

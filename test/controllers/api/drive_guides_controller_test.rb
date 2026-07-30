@@ -29,7 +29,9 @@ class Api::DriveGuidesControllerTest < ActionDispatch::IntegrationTest
     original_label = label_singleton_class.instance_method(:call)
     original_landmarks = landmark_singleton_class.instance_method(:call)
     label_singleton_class.define_method(:call) { |**| location }
-    landmark_singleton_class.define_method(:call) { |**| landmarks }
+    landmark_singleton_class.define_method(:call) do |**|
+      landmarks.map { |name| NearbyLandmarkResolver::Landmark.new(name:, wikipedia_title: nil) }
+    end
     yield
   ensure
     label_singleton_class.define_method(:call, original_label)

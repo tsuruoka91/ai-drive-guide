@@ -5,9 +5,10 @@ module Api
       longitude = coordinate!(:longitude, -180.0..180.0)
       location = LocationLabelResolver.call(latitude:, longitude:)
       landmarks = NearbyLandmarkResolver.call(latitude:, longitude:)
+      history = WikipediaSummaryResolver.call(title: landmarks.find(&:wikipedia_title)&.wikipedia_title)
 
       render json: {
-        guide: DriveGuideGenerator.call(latitude:, longitude:, location:, landmarks:),
+        guide: DriveGuideGenerator.call(latitude:, longitude:, location:, landmarks: landmarks.map(&:name), history:),
         location:
       }
     rescue DriveGuideGenerator::GenerationError

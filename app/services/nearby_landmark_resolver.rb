@@ -3,6 +3,7 @@ require "net/http"
 require "uri"
 
 class NearbyLandmarkResolver
+  Landmark = Struct.new(:name, :wikipedia_title, keyword_init: true)
   ENDPOINT = URI("https://overpass-api.de/api/interpreter")
   SEARCH_RADIUS_METERS = 600
   MAXIMUM_LANDMARKS = 5
@@ -10,9 +11,10 @@ class NearbyLandmarkResolver
 
   @rate_limit_mutex = Mutex.new
   @last_request_at = Time.at(0)
+  @cache = ActiveSupport::Cache::MemoryStore.new
 
   class << self
-    attr_reader :rate_limit_mutex
+    attr_reader :rate_limit_mutex, :cache
     attr_accessor :last_request_at
 
     def call(latitude:, longitude:)
@@ -20,18 +22,31 @@ class NearbyLandmarkResolver
     end
   end
 
-  def initialize(fetcher: nil, throttle: true)
+  def initialize(fetcher: nil, throttle: true, cache: self.class.cache)
     @fetcher = fetcher
     @throttle = throttle
+    @cache = cache
   end
 
   def call(latitude:, longitude:)
+    cache_key = "nearby-landmarks/#{latitude.round(3)}/#{longitude.round(3)}"
+    cached_landmarks = @cache&.read(cache_key)
+    return cached_landmarks if cached_landmarks.present?
+
     throttle! if @throttle
 
     body = @fetcher ? @fetcher.call(query_for(latitude:, longitude:)) : perform_request(latitude:, longitude:)
     return [] unless body
 
-    JSON.parse(body).fetch("elements", []).filter_map { |element| element.dig("tags", "name") }.uniq.first(MAXIMUM_LANDMARKS)
+    landmarks = JSON.parse(body).fetch("elements", []).filter_map do |element|
+      tags = element.fetch("tags", {})
+      name = tags["name"]
+      next if name.blank?
+
+      Landmark.new(name:, wikipedia_title: wikipedia_title_for(tags))
+    end.uniq(&:name).first(MAXIMUM_LANDMARKS)
+    @cache&.write(cache_key, landmarks, expires_in: 5.minutes) if landmarks.any?
+    landmarks
   rescue JSON::ParserError, Net::OpenTimeout, Net::ReadTimeout, SocketError, URI::InvalidURIError
     []
   end
@@ -70,5 +85,12 @@ class NearbyLandmarkResolver
       sleep(wait) if wait.positive?
       self.class.last_request_at = Time.current
     end
+  end
+
+  def wikipedia_title_for(tags)
+    reference = tags["wikipedia:ja"] || tags["wikipedia"]
+    return unless reference
+
+    reference.delete_prefix("ja:") if reference.start_with?("ja:")
   end
 end
