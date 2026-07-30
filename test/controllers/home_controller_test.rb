@@ -6,5 +6,6 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", "AI Drive Guide"
+    assert_select "button", "ドライブ開始"
   end
 end

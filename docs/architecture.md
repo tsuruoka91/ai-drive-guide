@@ -15,16 +15,15 @@
 
 ## 現在の実装範囲
 
-実装済みなのはRailsの初期構成、PostgreSQL接続、Hotwire / Stimulusのセットアップ、トップ画面、トップ画面の到達テストである。ドライブガイド機能は未実装である。
+Railsの初期構成、PostgreSQL接続、Hotwire / Stimulusのセットアップに加え、固定ガイドを返す最初のMVPを実装済みである。座標はリクエスト処理だけに使い、保存しない。Railsのパラメータログからも除外している。
 
-## 次に実装するMVP
+## 実装済みMVP
 
-1. トップ画面に「ドライブ開始」ボタンを追加する。
-2. ボタン操作で `navigator.geolocation.getCurrentPosition` を1回実行する。
-3. 緯度・経度を同一オリジンのRailsエンドポイントへPOSTする。
-4. Railsは座標の数値・範囲を検証し、固定のガイド文をJSONで返す。
-5. Stimulusが文章を画面に表示し、`SpeechSynthesisUtterance`（`lang = "ja-JP"`）で読み上げる。
-6. 位置情報の未対応・権限拒否・取得失敗、通信失敗、音声未対応・再生失敗を画面に表示する。
+1. トップ画面の「ドライブ開始」ボタンで `navigator.geolocation.getCurrentPosition` を1回実行する。
+2. 緯度・経度を同一オリジンのRailsエンドポイントへPOSTする。
+3. Railsは座標の数値・範囲を検証し、固定のガイド文をJSONで返す。
+4. Stimulusが文章を画面に表示し、`SpeechSynthesisUtterance`（`lang = "ja-JP"`）で読み上げる。
+5. 位置情報の未対応・権限拒否・取得失敗、通信失敗、音声未対応・再生失敗を画面に表示する。
 
 想定するAPIは以下である。
 
@@ -41,7 +40,7 @@ Content-Type: application/json
 
 初期段階ではモデルやマイグレーションを作らず、座標やガイド文を保存しない。
 
-## 予定ディレクトリ
+## 実装済みディレクトリ
 
 ```text
 app/controllers/api/drive_guides_controller.rb
@@ -51,6 +50,10 @@ test/controllers/api/drive_guides_controller_test.rb
 ```
 
 固定文言を返す `DriveGuideGenerator` を先に作り、後のOpenAI連携ではサービス実装だけを差し替えられるようにする。
+
+## 次のフェーズ
+
+OpenAI API連携では、`DriveGuideGenerator` の実装を差し替える。APIキーはRails Credentialsまたはデプロイ環境の環境変数で管理し、座標をそのまま送る必要があるかを最小化してから導入する。
 
 ## セキュリティとプライバシー
 

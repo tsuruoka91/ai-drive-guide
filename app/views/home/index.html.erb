@@ -1,5 +1,15 @@
-<main class="welcome" data-controller="welcome">
+<main class="welcome" data-controller="drive-guide">
   <h1>AI Drive Guide</h1>
-  <p>ドライブ中のための音声ガイドアプリ</p>
-  <p>ドライブガイド機能は次のステップで追加します。</p>
+  <p>現在地をもとに、短いドライブガイドをお届けします。</p>
+
+  <button class="primary-button" type="button" data-drive-guide-target="startButton" data-action="drive-guide#start">
+    ドライブ開始
+  </button>
+
+  <p class="status" aria-live="polite" data-drive-guide-target="status"></p>
+  <p class="guide" aria-live="polite" data-drive-guide-target="guide" hidden></p>
+
+  <button class="secondary-button" type="button" data-drive-guide-target="retrySpeechButton" data-action="drive-guide#speakGuide" hidden>
+    もう一度読み上げる
+  </button>
 </main>

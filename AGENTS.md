@@ -7,7 +7,8 @@
 - Rails 8.0.5.1、Ruby 3.3.5、PostgreSQL 16を使用する。
 - Hotwire は Turbo / Stimulus と importmap を使用する。Node.jsのビルド工程は追加しない。
 - Docker Composeで開発する。Webアプリは `http://localhost:3000` で起動する。
-- 現在は初期画面のみ。位置情報取得、ガイドAPI、OpenAI連携、音声読み上げは未実装。
+- 固定文言を返す最初のMVPは実装済み。位置情報取得、Rails API、画面表示、SpeechSynthesisによる読み上げを含む。
+- OpenAI API連携、位置情報の永続化、走行履歴は未実装。
 
 ## 実装上の方針
 

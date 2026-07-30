@@ -24,3 +24,47 @@ body {
   padding: 24px;
   text-align: center;
 }
+
+.welcome > * + * {
+  margin-top: 16px;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  color: #fff;
+  background: #1455a3;
+}
+
+.secondary-button {
+  color: #172033;
+  background: #e2e8f3;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.status {
+  min-height: 1.5em;
+}
+
+.status.error {
+  color: #b42318;
+}
+
+.guide {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.6;
+}

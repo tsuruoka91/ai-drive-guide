@@ -1,6 +1,6 @@
 # AI Drive Guide
 
-スマートフォンの位置情報を基に短い音声ガイドを提供する Rails アプリです。現在は Docker Compose、PostgreSQL、Hotwire / Stimulus を備えた初期構成のみを含みます。ドライブガイド機能はまだ実装していません。
+スマートフォンの位置情報を基に短い音声ガイドを提供する Rails アプリです。現在は固定文言を返す最初のMVPを実装しており、OpenAI API連携はまだ行いません。
 
 ## 技術構成
 
@@ -8,6 +8,15 @@
 - PostgreSQL 16
 - Hotwire（Turbo / Stimulus、importmap）
 - Docker Compose
+
+## 現在のMVP
+
+- 「ドライブ開始」操作で現在地を1回取得
+- Rails APIへ座標をPOSTし、固定の日本語ガイドを取得
+- ガイドを画面に表示して、ブラウザのSpeechSynthesis APIで読み上げ
+- 位置情報・通信・音声読み上げのエラーを画面に表示
+
+位置情報は保存せず、緯度・経度はRailsのパラメータログから除外しています。
 
 ## 起動方法
 
