@@ -57,6 +57,10 @@ test/controllers/api/drive_guides_controller_test.rb
 
 `DriveGuideGenerator` はOpenAIのResponses APIとStructured Outputsを利用する。APIキーは `OPENAI_API_KEY` としてRailsコンテナだけへ渡し、ブラウザへ送らない。既定モデルは短いガイドの低遅延用途に `gpt-5.6-luna` を使い、`OPENAI_MODEL` で変更できる。応答は `display_text`（漢字混じりの画面表示）と `speech_text`（漢字を含まない読み上げ用）の2項目とし、ブラウザのSpeechSynthesisには後者だけを渡す。Railsは漢字を含まない `display_text`、または漢字を含む `speech_text` をエラーとして扱う。
 
+## 地図表示
+
+`drive_guide_controller.js` は現在地を取得した後、Google Maps JavaScript APIを遅延読み込みして地図の中心と「現在地」マーカーを更新する。開発用シミュレーションでも同じ更新処理を使う。`GOOGLE_MAPS_API_KEY` はブラウザで利用するため公開されるが、OpenAIキーとは別の専用キーとし、HTTPリファラーとMaps JavaScript APIだけに制限する。未設定または読み込み失敗時も、ガイド取得・読み上げは継続する。
+
 送信する座標は小数第3位へ丸める。座標をそのまま保存せず、ログにも出力しない。APIキー未設定時はローカル確認用に固定ガイドを返すが、本番では必ずAPIキーを設定する。
 
 ## 逆ジオコーディング

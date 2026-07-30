@@ -27,6 +27,7 @@
 - Geolocation APIはHTTPS環境（開発時はlocalhost）で使う。位置取得は明示的なユーザー操作を起点にする。
 - SpeechSynthesisは`ja-JP`を指定する。iPhone Safariで自動再生できない場合に備え、再読み上げ操作を提供する。
 - SpeechSynthesisには、OpenAIが生成した漢字を含まない`speech_text`だけを渡す。画面表示用の`guide`とは混在させない。
+- Google Maps JavaScript API用の`GOOGLE_MAPS_API_KEY`はブラウザで使用する専用キーにする。OpenAIキーと共有せず、HTTPリファラーとMaps JavaScript APIだけに制限する。
 - 変更は最小限にし、MVP外の認証・履歴・バックグラウンド位置追跡は追加しない。
 
 ## 作業時のコマンド

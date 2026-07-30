@@ -1,4 +1,4 @@
-<main class="welcome" data-controller="drive-guide" data-drive-guide-development-value="<%= Rails.env.development? %>">
+<main class="welcome" data-controller="drive-guide" data-drive-guide-development-value="<%= Rails.env.development? %>" data-drive-guide-google-maps-api-key-value="<%= ENV.fetch("GOOGLE_MAPS_API_KEY", "") %>">
   <h1>AI Drive Guide</h1>
   <p>現在地をもとに、短いドライブガイドをお届けします。</p>
   <p class="privacy-note">現在地の周辺情報をOpenAIとOpenStreetMapへ送信します。位置情報は保存しません。</p>
@@ -9,6 +9,12 @@
 
   <p class="status" aria-live="polite" data-drive-guide-target="status"></p>
   <p class="guide" aria-live="polite" data-drive-guide-target="guide" hidden></p>
+
+  <section class="map-panel" aria-labelledby="map-title">
+    <h2 id="map-title">現在地</h2>
+    <div class="map" data-drive-guide-target="map" aria-label="現在地を表示する地図"></div>
+    <p class="map-notice" aria-live="polite" data-drive-guide-target="mapNotice">現在地を取得すると地図を表示します。</p>
+  </section>
 
   <button class="secondary-button" type="button" data-drive-guide-target="retrySpeechButton" data-action="drive-guide#speakGuide" hidden>
     もう一度読み上げる

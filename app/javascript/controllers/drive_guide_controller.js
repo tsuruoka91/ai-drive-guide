@@ -1,12 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton"]
-  static values = { development: Boolean }
+  static targets = ["startButton", "status", "guide", "retrySpeechButton", "simulationLocation", "simulationButton", "map", "mapNotice"]
+  static values = { development: Boolean, googleMapsApiKey: String }
 
   connect() {
     this.guideText = null
     this.isRequesting = false
+    this.googleMapsLoadingPromise = null
   }
 
   start() {
@@ -21,7 +22,10 @@ export default class extends Controller {
     this.setStatus("現在地を取得しています…")
 
     navigator.geolocation.getCurrentPosition(
-      (position) => this.requestGuide(position.coords),
+      (position) => {
+        this.updateMap(position.coords)
+        this.requestGuide(position.coords)
+      },
       (error) => this.handleLocationError(error),
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 }
     )
@@ -34,7 +38,9 @@ export default class extends Controller {
 
     this.beginRequest()
     this.setStatus("シミュレーション地点でガイドを準備しています…")
-    this.requestGuide({ latitude, longitude })
+    const coords = { latitude, longitude }
+    this.updateMap(coords)
+    this.requestGuide(coords)
   }
 
   async requestGuide(coords) {
@@ -100,6 +106,74 @@ export default class extends Controller {
 
   geolocationAvailable() {
     return "geolocation" in navigator
+  }
+
+  async updateMap(coords) {
+    if (!this.googleMapsApiKeyValue) {
+      this.mapNoticeTarget.hidden = false
+      this.mapNoticeTarget.textContent = "地図を表示するには、GOOGLE_MAPS_API_KEY を設定してください。"
+      return
+    }
+
+    try {
+      await this.loadGoogleMaps()
+      const center = { lat: coords.latitude, lng: coords.longitude }
+
+      if (!this.map) {
+        this.map = new window.google.maps.Map(this.mapTarget, {
+          center,
+          zoom: 16,
+          mapTypeControl: false,
+          streetViewControl: false
+        })
+        this.currentLocationMarker = new window.google.maps.Marker({
+          map: this.map,
+          position: center,
+          title: "現在地"
+        })
+      } else {
+        this.map.setCenter(center)
+        this.currentLocationMarker.setPosition(center)
+      }
+
+      this.mapNoticeTarget.hidden = true
+    } catch (_) {
+      this.mapNoticeTarget.hidden = false
+      this.mapNoticeTarget.textContent = "地図を読み込めませんでした。Google Maps APIキーの設定を確認してください。"
+    }
+  }
+
+  loadGoogleMaps() {
+    if (window.google?.maps?.Map) return Promise.resolve()
+    if (this.googleMapsLoadingPromise) return this.googleMapsLoadingPromise
+
+    this.googleMapsLoadingPromise = new Promise((resolve, reject) => {
+      const callbackName = "aiDriveGuideGoogleMapsReady"
+      window[callbackName] = () => {
+        delete window[callbackName]
+        resolve()
+      }
+
+      const script = document.createElement("script")
+      const params = new URLSearchParams({
+        key: this.googleMapsApiKeyValue,
+        loading: "async",
+        callback: callbackName,
+        v: "weekly",
+        language: "ja",
+        region: "JP",
+        auth_referrer_policy: "origin"
+      })
+      script.src = `https://maps.googleapis.com/maps/api/js?${params}`
+      script.async = true
+      script.onerror = () => {
+        delete window[callbackName]
+        reject(new Error("Google Maps could not load"))
+      }
+      document.head.appendChild(script)
+    })
+
+    return this.googleMapsLoadingPromise
   }
 
   setStatus(message) {

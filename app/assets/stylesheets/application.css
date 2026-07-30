@@ -75,6 +75,29 @@ body {
   line-height: 1.6;
 }
 
+.map-panel {
+  width: min(100%, 640px);
+  margin-inline: auto;
+  text-align: left;
+}
+
+.map-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.map {
+  height: 280px;
+  border-radius: 8px;
+  background: #e2e8f3;
+}
+
+.map-notice {
+  margin: 8px 0 0;
+  color: #526074;
+  font-size: 0.875rem;
+}
+
 .debug-panel {
   max-width: 360px;
   margin-inline: auto;
