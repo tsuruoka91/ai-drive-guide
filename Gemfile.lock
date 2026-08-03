@@ -177,7 +177,7 @@ GEM
     nio4r (2.7.5)
     nokogiri (1.19.4-x86_64-linux-gnu)
       racc (~> 1.4)
-    openai (0.73.0)
+    openai (0.75.0)
       base64
       cgi
       connection_pool
